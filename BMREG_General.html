@@ -1,0 +1,291 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMREG_General</title>
+
+    <style>
+        .logo-container {
+            text-align: center;
+            padding: 50px;
+            background-color: #f8f9fa;
+        }
+        .logo-container img {
+            max-width: 300px;
+            height: auto;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 55%;
+            margin-top: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        /* Table Styling */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    display: block; /* Change from flex to block to allow full width scrolling */
+    white-space: nowrap;
+}
+
+table {
+    width: 100%;
+    min-width: 900px; /* Adjust this as needed */
+    border-collapse: collapse;
+    background: #ffffff;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    table-layout: auto;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    white-space: nowrap; /* Prevents text wrapping */
+}
+
+/* Ensure scrolling works on mobile */
+@media screen and (max-width: 768px) {
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
+    }
+}
+
+    th {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #f1c40f;
+        color: #ffffff;
+        transition: 0.3s;
+    }
+
+        /* Hide Table by Default */
+        #entriesTable {
+            display: none;
+        }
+
+        /* Filter Input */
+        #searchInput {
+            width: 50%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container" id="formContainer">
+        <a href="https://example.com" target="_blank">
+            <img src="https://i.postimg.cc/QCc4KgFG/sw-logo.png" alt="Company Logo">
+        </a>
+
+        <h3>BMREG_General</h3>
+
+        <form id="dataForm" onsubmit="submitForm(event)">
+            <label for="unit">Unit:</label>
+            <select id="unit" name="unit" required>
+                <option value="">Loading...</option>
+            </select>
+
+            <label for="reName">BTL Name / RE Name / BM  Name / BCH Name :</label>
+            <select id="reName" name="reName" required>
+                <option value="">Select Unit First</option>
+            </select>
+
+            <label for="ShirtSize">Shirt Size:</label>
+	<select id="ShirtSize" name="ShirtSize" required>
+	  <option value="">-- Select Size --</option>
+ 	  <option value="Small">Small</option>
+ 	  <option value="Medium">Medium</option>
+	  <option value="Large">Large</option>
+	  <option value="Extra Large">Extra Large</option>
+	</select>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <!-- Show Details Button -->
+    <button onclick="showDetails()">Show Details</button>
+
+    <!-- Entries Table -->
+    <div id="entriesTable">
+        <h2>Submitted Entries</h2>
+
+        <!-- Search Input for Filtering -->
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search for entries...">
+
+<div class="table-container">
+    <div style="min-width: 1000px;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Unit</th>
+                    <th>RE Name</th>
+                    <th>Shirt Size</th>
+                </tr>
+            </thead>
+            <tbody id="entriesBody"></tbody>
+        </table>
+    </div>
+</div>
+
+     <script>
+        const scriptURL = "https://script.google.com/macros/s/AKfycbyzTA8KSHTHxeuS4QdGoyIhFZVi5aRPCu65fWnq_b53uA7PaNtSaTWKUiL8WZpVaefz/exec";
+        const password = "BMREG123*"; 
+
+        function showDetails() {
+
+            let inputPassword = prompt("Enter Password to View Details:");
+            if (inputPassword === password) {
+                document.getElementById("entriesTable").style.display = "block";
+                document.getElementById("formContainer").style.display = "none";  // Hide the form
+                loadEntries();
+            } else {
+                alert("Incorrect Password! Access Denied.");
+            }
+        }
+
+        async function fetchDropdownData() {
+            const response = await fetch(scriptURL + "?action=getDropdownData");
+            const data = await response.json();
+            const unitDropdown = document.getElementById("unit");
+            unitDropdown.innerHTML = `<option value="">Select Unit</option>`;
+
+            Object.keys(data).forEach(unit => {
+                let option = document.createElement("option");
+                option.value = unit;
+                option.textContent = unit;
+                unitDropdown.appendChild(option);
+            });
+
+            unitDropdown.addEventListener("change", function() {
+                const reDropdown = document.getElementById("reName");
+                reDropdown.innerHTML = `<option value="">Select RE Name</option>`;
+                const selectedUnit = this.value;
+                if (data[selectedUnit]) {
+                    data[selectedUnit].forEach(reName => {
+                        let option = document.createElement("option");
+                        option.value = reName;
+                        option.textContent = reName;
+                        reDropdown.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        async function submitForm(event) {
+            event.preventDefault();
+            const form = document.getElementById("dataForm");
+            const formData = new FormData(form);
+
+            const response = await fetch(scriptURL, {
+                method: "POST",
+                body: new URLSearchParams(formData),
+            });
+
+            if (response.ok) {
+                alert("Data submitted successfully!");
+                form.reset();
+                loadEntries();
+            } else {
+                alert("Error submitting data.");
+            }
+        }
+
+        async function loadEntries() {
+            const response = await fetch(scriptURL + "?action=getEntries");
+            const entries = await response.json();
+            const tableBody = document.getElementById("entriesBody");
+            tableBody.innerHTML = "";
+
+            entries.forEach(row => {
+                let tr = document.createElement("tr");
+                row.forEach(cell => {
+                    let td = document.createElement("td");
+                    td.textContent = cell;
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchDropdownData();
+        });
+
+        function filterTable() {
+            let input = document.getElementById("searchInput").value.toLowerCase();
+            let rows = document.querySelectorAll("#entriesBody tr");
+
+            rows.forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
+            });
+        }
+    </script>
+
+</body>
+</html>
